@@ -75,3 +75,6 @@ app.get("/api/requests", async (req, res) => {
   const requests = await Request.find();
   res.json(requests);
 });
+
+require("dotenv").config()
+mongoose.connect(process.env.MONGO_URI)
