@@ -9,6 +9,14 @@ mongoose.connection.once("open", () => {
   console.log("✅ MongoDB connected");
 });
 
+const donorSchema = new mongoose.Schema({
+  name: String,
+  bloodGroup: String,
+  phone: String,
+  city: String
+});
+
+const Donor = mongoose.model("Donor", donorSchema);
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
@@ -22,9 +30,14 @@ let donors = [];
 let requests = [];
 
 // Register donor
-app.post("/api/donors", (req, res) => {
-  donors.push(req.body);
-  res.json({ message: "Donor registered successfully!" });
+app.post("/api/donors", async (req, res) => {
+  try {
+    const newDonor = new Donor(req.body);
+    await newDonor.save();
+    res.json({ message: "Donor saved successfully" });
+  } catch (error) {
+    res.status(500).json({ error: "Error saving donor" });
+  }
 });
 
 // Post blood request
@@ -34,8 +47,13 @@ app.post("/api/requests", (req, res) => {
 });
 
 // Get all donors
-app.get("/api/donors", (req, res) => {
-  res.json(donors);
+app.get("/api/donors", async (req, res) => {
+  try {
+    const donors = await Donor.find();
+    res.json(donors);
+  } catch (error) {
+    res.status(500).json({ error: "Error fetching donors" });
+  }
 });
 
 // Get all requests
